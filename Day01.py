@@ -23,7 +23,7 @@ def part_one(data: list) -> int:
         # Add value to current sum
         else:
             calorie_sum += int(line)
-    # Add last entry to list (no blank line at end of list)
+    # Else add last entry to list (no blank line at end of list)
     calorie_list.append(calorie_sum)
     # Find the maximum value in list
     max_calorie = max(calorie_list)
@@ -42,7 +42,7 @@ def part_two(data: list) -> int:
         if line == '':
             calorie_list.append(calorie_sum)
             calorie_sum = 0
-        # Add value to current sum
+        # Else add value to current sum
         else:
             calorie_sum += int(line)
     # Add last entry to list (no blank line at end of list)
