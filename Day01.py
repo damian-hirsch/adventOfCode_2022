@@ -6,27 +6,59 @@ def get_input():
     with open('input/Day01.txt', 'r') as file:
         # Split lines and write each line to list
         data = file.read().splitlines()
-        # Map strings in list to integers
-        data = list(map(int, data))
     return data
 
 
 # Solves part 1
-def part_one() -> np.ndarray:
-    test = np.zeros(5)
-    return test
+def part_one(data: list) -> int:
+    # Initialize list and calorie sum
+    calorie_list = []
+    calorie_sum = 0
+    # Go through the list
+    for line in data:
+        # If we find a blank line, append value to the calorie list and set sum to 0
+        if line == '':
+            calorie_list.append(calorie_sum)
+            calorie_sum = 0
+        # Add value to current sum
+        else:
+            calorie_sum += int(line)
+    # Add last entry to list (no blank line at end of list)
+    calorie_list.append(calorie_sum)
+    # Find the maximum value in list
+    max_calorie = max(calorie_list)
+
+    return max_calorie
 
 
 # Solves part 2
-def part_two() -> int:
+def part_two(data: list) -> int:
+    # Initialize list and calorie sum
+    calorie_list = []
+    calorie_sum = 0
+    # Go through the list
+    for line in data:
+        # If we find a blank line, append value to the calorie list and set sum to 0
+        if line == '':
+            calorie_list.append(calorie_sum)
+            calorie_sum = 0
+        # Add value to current sum
+        else:
+            calorie_sum += int(line)
+    # Add last entry to list (no blank line at end of list)
+    calorie_list.append(calorie_sum)
+    # Sort the list
+    calorie_list.sort()
+    # Get last three values (list is sorted ASC by default) and take the sum
+    top3_calorie = sum(calorie_list[-3:])
 
-    return 2
+    return top3_calorie
 
 
 def main():
 
-    print('This many measurements are larger than the previous measurement: ', part_one())
-    print('This sums are larger than the previous sum: ', part_two())
+    print('The elf is carrying:', part_one(get_input()))
+    print('The top three elves are carrying:', part_two(get_input()))
 
 
 if __name__ == '__main__':
