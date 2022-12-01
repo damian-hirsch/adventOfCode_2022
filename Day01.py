@@ -1,6 +1,3 @@
-import numpy as np
-
-
 # Get data from .txt file
 def get_input():
     with open('input/Day01.txt', 'r') as file:
