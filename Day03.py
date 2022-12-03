@@ -1,7 +1,7 @@
-# Get data from .txt file
 import string
 
 
+# Get data from .txt file
 def get_input():
     with open('input/Day03.txt', 'r') as file:
         # Split lines and write each line to list
