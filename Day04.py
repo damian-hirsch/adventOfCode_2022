@@ -1,4 +1,4 @@
-import numpy as np
+import re
 
 
 # Get data from .txt file
@@ -6,27 +6,56 @@ def get_input():
     with open('input/Day04.txt', 'r') as file:
         # Split lines and write each line to list
         data = file.read().splitlines()
-        # Map strings in list to integers
-        data = list(map(int, data))
-    return data
+    # Convert string to list of tuples
+    number_list = []
+    for line in data:
+        # Find the numbers using regex
+        re_matches = re.search(r'(\d+)-(\d+),(\d+)-(\d+)', line)
+        a = int(re_matches.group(1))
+        b = int(re_matches.group(2))
+        c = int(re_matches.group(3))
+        d = int(re_matches.group(4))
+        # Append numbers to list
+        number_list.append((a, b, c, d))
+    return number_list
 
 
 # Solves part 1
-def part_one() -> np.ndarray:
-    test = np.zeros(5)
-    return test
+def part_one(data: list[tuple]) -> int:
+    # Initialize count
+    count = 0
+    for line in data:
+        # Unpack tuple
+        a, b, c, d = line
+        # Create ranges and convert to sets
+        section_1 = set(range(a, b + 1))
+        section_2 = set(range(c, d + 1))
+        # Check if either set is a subset of the other set
+        if section_1.issubset(section_2) or section_2.issubset(section_1):
+            count += 1
+    return count
 
 
 # Solves part 2
-def part_two() -> int:
-
-    return 2
+def part_two(data: list[tuple]) -> int:
+    # Initialize count
+    count = 0
+    for line in data:
+        # Unpack tuple
+        a, b, c, d = line
+        # Create ranges and convert to sets
+        section_1 = set(range(a, b + 1))
+        section_2 = set(range(c, d + 1))
+        # Check if there is any overlap between the sets
+        if bool(section_1 & section_2):
+            count += 1
+    return count
 
 
 def main():
 
-    print('This many measurements are larger than the previous measurement: ', part_one())
-    print('This sums are larger than the previous sum: ', part_two())
+    print('In this many assignment pairs does one range fully contain the other:', part_one(get_input()))
+    print('In this many assignment pairs do the ranges overlap:', part_two(get_input()))
 
 
 if __name__ == '__main__':
