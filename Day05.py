@@ -57,7 +57,7 @@ def part_one(crate_list: list, instruction_list: list) -> str:
     for i in range(9):
         # Check if stack is not empty
         if crate_list[i]:
-            # Write down label of top crate if each stack
+            # Write down label of top crate of each stack
             string += crate_list[i][0]
     return string
 
@@ -81,7 +81,7 @@ def part_two(crate_list: list, instruction_list: list) -> str:
     for i in range(9):
         # Check if stack is not empty
         if crate_list[i]:
-            # Write down label of top crate if each stack
+            # Write down label of top crate of each stack
             string += crate_list[i][0]
     return string
 
