@@ -55,7 +55,7 @@ def part_two(trees: np.ndarray) -> int:
             top_trees = np.asarray(trees[j, i] > trees[:j, i])
             # Reverse the order because we look bottom up
             top_trees = top_trees[::-1]
-            # Go through the array and check how many tries we can see
+            # Go through the array and check how many trees we can see
             for k in range(len(top_trees)):
                 # If tree is smaller, add it
                 if top_trees[k]:
@@ -70,7 +70,7 @@ def part_two(trees: np.ndarray) -> int:
             right = 0
             # Check which trees are larger and convert to array
             right_trees = np.asarray(trees[j, i] > trees[j, i+1:])
-            # Go through the array and check how many tries we can see
+            # Go through the array and check how many trees we can see
             for k in range(len(right_trees)):
                 # If tree is smaller, add it
                 if right_trees[k]:
@@ -85,7 +85,7 @@ def part_two(trees: np.ndarray) -> int:
             bottom = 0
             # Check which trees are larger and convert to array
             bottom_trees = np.asarray(trees[j, i] > trees[j+1:, i])
-            # Go through the array and check how many tries we can see
+            # Go through the array and check how many trees we can see
             for k in range(len(bottom_trees)):
                 # If tree is smaller, add it
                 if bottom_trees[k]:
@@ -102,7 +102,7 @@ def part_two(trees: np.ndarray) -> int:
             left_trees = np.asarray(trees[j, i] > trees[j, :i])
             # Reverse the order because we look from right to left
             left_trees = left_trees[::-1]
-            # Go through the array and check how many tries we can see
+            # Go through the array and check how many trees we can see
             for k in range(len(left_trees)):
                 # If tree is smaller, add it
                 if left_trees[k]:
