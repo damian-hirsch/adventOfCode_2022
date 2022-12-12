@@ -38,7 +38,7 @@ class Node:
         self.h = 0
         self.f = 0
 
-    # Defining what needs to be compared when comparing to Node classes
+    # Defining what needs to be compared when comparing two Nodes
     def __eq__(self, other):
         return self.position == other.position
 
@@ -89,12 +89,13 @@ def astar(maze: np.ndarray, starts: list, end: tuple):
     end_node.g = end_node.h = end_node.f = 0
 
     # Which squares do we search (neighbors)
-    adjacent_squares = ((-1, 0), (0, 1), (1, 0), (0, -1))
+    adjacent_squares = [(-1, 0), (0, 1), (1, 0), (0, -1)]
 
     # Loop until no more nodes
     while len(open_list) > 0:
         # Get the current node
         current_node = heapq.heappop(open_list)
+
         # Add it to the closed list
         closed_list.append(current_node)
 
@@ -102,8 +103,7 @@ def astar(maze: np.ndarray, starts: list, end: tuple):
         if current_node == end_node:
             return return_path(current_node)
 
-        # Generate children
-        children = []
+        # Check neighbors
         for new_position in adjacent_squares:
             # Get node position
             node_position = (current_node.position[0] + new_position[0], current_node.position[1] + new_position[1])
@@ -121,26 +121,32 @@ def astar(maze: np.ndarray, starts: list, end: tuple):
             # Create new node
             new_node = Node(current_node, node_position)
 
-            # Append as child
-            children.append(new_node)
-
-        # Loop through children
-        for child in children:
-            # Child is on the closed list, continue and investigate the next child node
-            if child in closed_list:
+            # Check if new node is already on the closed list
+            if new_node in closed_list:
                 continue
 
-            # Create/update the f, g, and h values
-            child.g = current_node.g + 1
-            child.h = abs(child.position[0] - end_node.position[0]) + abs(child.position[1] - end_node.position[1])
-            child.f = child.g + child.h
+            # Create the f, g, and h values
+            new_node.g = current_node.g + 1
+            new_node.h = abs(new_node.position[0] - end_node.position[0]) + abs(new_node.position[1] - end_node.position[1])
+            new_node.f = new_node.g + new_node.h
 
-            # Check if the child is already in the open list, if not, continue and investigate the next node
-            if child in open_list:
-                continue
+            # Check if the new node is already in the open list
+            if new_node in open_list:
+                idx = open_list.index(new_node)
+                if new_node.g < open_list[idx].g:
+                    # Update the element
+                    open_list[idx].g = new_node.g
+                    open_list[idx].h = new_node.g
+                    open_list[idx].f = new_node.g
+                    open_list[idx].parent = new_node.parent
+                    # Update the priority queue
+                    heapq.heapify(open_list)
+                    continue
+                else:
+                    continue
 
-            # Otherwise, add the child to the open list
-            heapq.heappush(open_list, child)
+            # If neither in closed and open list, add the new node to the open list
+            heapq.heappush(open_list, new_node)
 
     return -1
 
