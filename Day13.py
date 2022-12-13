@@ -18,7 +18,7 @@ def get_input():
     return data_list
 
 
-# Evaluate list
+# Evaluate two lists
 def eval_list(list_left: list, list_right: list) -> int:
     # While both lists still have data, keep evaluating
     while len(list_left) > 0 and len(list_right) > 0:
