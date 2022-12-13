@@ -2,6 +2,22 @@ import ast
 import copy
 
 
+# Get data from .txt file
+def get_input():
+    with open('input/Day13.txt', 'r') as file:
+        # Split lines and write each line to list
+        data = file.read().splitlines()
+        # Create list of lists
+        data_list = []
+        # Loop through each line
+        for line in data:
+            # If line is not a space append it
+            if line != '':
+                # Use literal_eval to convert string representation of list to actual list
+                data_list.append(ast.literal_eval(line))
+    return data_list
+
+
 # Evaluate list
 def eval_list(list_left: list, list_right: list) -> int:
     # While both lists still have data, keep evaluating
@@ -59,22 +75,6 @@ def eval_list(list_left: list, list_right: list) -> int:
     # If both lists are empty, return inconclusive result
     elif len(list_left) == 0 and len(list_right) == 0:
         return -1
-
-
-# Get data from .txt file
-def get_input():
-    with open('input/Day13.txt', 'r') as file:
-        # Split lines and write each line to list
-        data = file.read().splitlines()
-        # Create list of lists
-        data_list = []
-        # Loop through each line
-        for line in data:
-            # If line is not a space append it
-            if line != '':
-                # Use literal_eval to convert string representation of list to actual list
-                data_list.append(ast.literal_eval(line))
-    return data_list
 
 
 # Solves part 1
