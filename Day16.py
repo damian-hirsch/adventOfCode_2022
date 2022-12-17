@@ -1,6 +1,6 @@
 import numpy as np
 import re
-from math import inf
+from functools import lru_cache
 
 
 # Get data from .txt file
@@ -13,8 +13,7 @@ def get_input() -> (np.ndarray, list, dict):
         valve_dict = dict()
         flow_rate = []
         connecting_valves = []
-        # Save first valve position (starting valve)
-        start_valve = data[0][6:8]
+
         # Loop through all lines and retrieve info
         for i, line in enumerate(data):
             # Get valve name
@@ -34,32 +33,32 @@ def get_input() -> (np.ndarray, list, dict):
     return adj_map, np.asarray(flow_rate, dtype=int), valve_dict
 
 
-# Source: https://github.com/crixodia/python-dijkstra
-def adj_to_dist(adj_mat: np.ndarray, start: int, end=-1):
+# Source: https://stackoverflow.com/questions/32164012/how-to-get-distance-matrix-from-adjacency-matrix-matlab
+def adj_to_dist(adj_mat: np.ndarray, cost=1) -> np.ndarray:
     """
-    Dijkstra algorithm to convert an adjacent matrix to a distance matrix
+    This algorithm converts an adjacency matrix to a distance matrix using matrix properties
+    Adjacency matrix: Matrix where the cost of only directly connected nodes is shown and the others are 0
+    Distance matrix: Matrix where the cost to each node, potentially over multiple other nodes, is shown
     """
-    n = len(adj_mat)
-    dist = [inf] * n
-    dist[start] = adj_mat[start, start]
 
-    sp_vertex = [False] * n
+    # Initialize distance matrix
+    distance_mat = np.empty((adj_mat.shape[0], adj_mat.shape[1]))
+    distance_mat[:] = np.nan
+    # Initialize helper matrix
+    helper_mat = adj_mat
 
-    for count in range(n - 1):
-        minix = inf
-        u = 0
+    # Check if there are still non-visited nodes
+    while np.isnan(distance_mat[:]).any():
+        # Check for new walks and assign distance
+        distance_mat[np.where((helper_mat > 0) & (np.isnan(distance_mat)))] = cost
 
-        for v in range(len(sp_vertex)):
-            if sp_vertex[v] is False and dist[v] <= minix:
-                minix = dist[v]
-                u = v
+        # Update for next step
+        cost += 1
+        helper_mat = np.matmul(helper_mat, adj_mat)
 
-        sp_vertex[u] = True
-        for v in range(n):
-            if not(sp_vertex[v]) and adj_mat[u, v] != 0 and dist[u] + adj_mat[u, v] < dist[v]:
-                dist[v] = dist[u] + adj_mat[u, v]
-
-    return dist[end] if end >= 0 else dist
+    # Reset diagonals
+    np.fill_diagonal(distance_mat, 0)
+    return distance_mat
 
 
 def calc_pressure(i: int, t_left: int, indices: set, dist: np.ndarray, fr: np.ndarray) -> int:
@@ -79,23 +78,21 @@ def calc_pressure(i: int, t_left: int, indices: set, dist: np.ndarray, fr: np.nd
 
 # Solves part 1
 def part_one(adj_map: np.ndarray, flow_rate: np.ndarray, valve_dict: dict) -> int:
-    # Generate distance map from adjacent map by using Dijkstra algorithm
-    distance_map = np.zeros((adj_map.shape[0], adj_map.shape[1]), dtype=int)
-    for i in range(len(adj_map)):
-        distance_map[:, i] = np.asarray(adj_to_dist(adj_map, i), dtype=int)
+    # Get distance map from adjacency map
+    distance_map = adj_to_dist(adj_map).astype(dtype=int)
 
     # All distances that have a flow rate of 0 are irrelevant, expect the AA one (starting position)
-    # Find AA
+    # Find 'AA'
     idx_start = valve_dict['AA']
     # Find all zeros
     no_flow_idx = set(np.where(flow_rate == 0)[0])
-    # Remove AA
+    # Remove 'AA'
     no_flow_idx = list(no_flow_idx - {idx_start})
     # Delete those selected
     distance_map = np.delete(distance_map, no_flow_idx, 0)  # Rows
     distance_map = np.delete(distance_map, no_flow_idx, 1)  # Columns
     flow_rate = np.delete(flow_rate, no_flow_idx)
-    # Find AA again in the new setup
+    # Find 'AA' again in the new setup
     idx_start = int(np.where(flow_rate == 0)[0])
     # Initialize set of indices that should be searched
     indices = set(range(0, len(distance_map))) - {idx_start}
@@ -105,10 +102,59 @@ def part_one(adj_map: np.ndarray, flow_rate: np.ndarray, valve_dict: dict) -> in
     return max_released
 
 
+# Solves part 2
+def part_two(adj_map: np.ndarray, flow_rate: np.ndarray, valve_dict: dict) -> int:
+    # Get distance map from adjacency map
+    distance_map = adj_to_dist(adj_map).astype(dtype=int)
+
+    # All distances that have a flow rate of 0 are irrelevant, expect the AA one (starting position)
+    # Find 'AA'
+    idx_start = valve_dict['AA']
+    # Find all zero flow rates
+    no_flow_idx = set(np.where(flow_rate == 0)[0])
+    # Remove 'AA' from the exclusion set
+    no_flow_idx = list(no_flow_idx - {idx_start})
+    # Delete the no flow entries
+    distance_map = np.delete(distance_map, no_flow_idx, 0)  # Rows
+    distance_map = np.delete(distance_map, no_flow_idx, 1)  # Columns
+    flow_rate = np.delete(flow_rate, no_flow_idx)
+
+    # Find 'AA' again in the new setup for the starting position
+    idx_start = int(np.where(flow_rate == 0)[0])
+    # Initialize set of indices that should be searched (all left indices minus the starting index)
+    indices = set(range(0, len(distance_map))) - {idx_start}
+
+    # Because we cannot hash numpy arrays, we will add the function within the main function. Hence, the numpy
+    # arrays, which are "libraries" anyway, are known already and don't need to be hashed
+    @lru_cache(maxsize=None)
+    def calc_pressure_part2(current_index: int, t_left: int, index_set: frozenset, elephant: bool) -> int:
+        # Initialize released pressure
+        # If this pass is after the elephant, we start what it already released, otherwise we start at 0 as usual
+        if elephant:
+            released = calc_pressure_part2(idx_start, 26, index_set, False)
+        else:
+            released = 0
+        # Loop through all available indices
+        for j in index_set:
+            # Calculate projected time left when moving to that index
+            projected_t = t_left - 1 - distance_map[current_index, j]
+            # If that projected time is greater or equal to zero it still has use
+            if projected_t >= 0:
+                # Check if we already reached a higher value, otherwise sum the flow_rate of the target location
+                # multiplied by its flow rate and recurse for future locations
+                released = max(released,
+                               flow_rate[j] * projected_t + calc_pressure_part2(j, projected_t, index_set - {j},
+                                                                                elephant))
+        return released
+
+    # Let the elephant go
+    return calc_pressure_part2(idx_start, 26, frozenset(indices), True)
+
+
 def main():
     adj_map, flow_rate, valve_dict = get_input()
     print('The most pressure you can release is:', part_one(adj_map, flow_rate, valve_dict))
-    # print('The most pressure you can release with an elephant is:', part_two(adj_map, flow_rate, valve_dict))
+    print('The most pressure you can release with an elephant is:', part_two(adj_map, flow_rate, valve_dict))
 
 
 if __name__ == '__main__':
