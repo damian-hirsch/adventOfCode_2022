@@ -20,7 +20,7 @@ def calc_blueprint(blueprint: tuple, timer: int) -> int:
     m1 = m2 = m3 = m4 = 0
     r1 = 1
     r2 = r3 = r4 = 0
-    a, r1cm1, r2cm1, r3cm1, r3cm2, r4cm1, r4cm3 = blueprint
+    _, r1cm1, r2cm1, r3cm1, r3cm2, r4cm1, r4cm3 = blueprint
     t = timer
     # Create deque
     outcomes_deque = deque([(m1, m2, m3, m4, r1, r2, r3, r4, t)])
@@ -112,4 +112,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
